@@ -24,8 +24,6 @@ Object.keys(task.components).forEach(k => {
   }
 
   const componentFileName = path.join(componentDir, component.name + '.vue');
-  fs.unlinkSync(componentFileName); // @todo: remove
-
   if (!fs.existsSync(componentFileName)) {
     fs.appendFileSync(componentFileName, renderComponent(component));
   }
@@ -34,7 +32,9 @@ Object.keys(task.components).forEach(k => {
 });
 
 const componentMapFileName = path.join(sourcePath, 'components.js');
-fs.unlinkSync(componentMapFileName);
+if (fs.existsSync(componentMapFileName)) {
+  fs.unlinkSync(componentMapFileName);
+}
 fs.appendFileSync(componentMapFileName, 'export default {' + componentMap.join(',') + '}');
 
 function renderComponent({ name, props, methods, slots }) {
