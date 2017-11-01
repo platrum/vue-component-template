@@ -1,0 +1,57 @@
+.input-style() {
+  background: transparent;
+  border-radius: 4px;
+  width: 100%;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.input-hover {
+  outline-width: 0;
+  border: 1px solid rgba(206, 206, 206, 0.37) !important;
+}
+
+.input-focus {
+  outline-width: 0;
+  background-color: rgba(236, 232, 6, 0.07) !important;
+  border: 1px solid rgba(206, 206, 206, 0.37) !important;
+}
+
+.placeholder-color(@color) {
+  ::-webkit-input-placeholder {color: @color;}
+  ::-moz-placeholder          {color: @color;}/* Firefox 19+ */
+  :-moz-placeholder           {color: @color;}/* Firefox 18- */
+  :-ms-input-placeholder      {color: @color;}
+  }
+
+.flex-input() {
+  flex: 1;
+  width: 100%;
+}
+
+.default-text-input() {
+  .placeholder-color(#aaa);
+  .flex-input();
+
+  input {
+    .input-style();
+
+    &:hover {
+      .input-hover();
+    }
+
+    &:focus {
+      .input-focus();
+    }
+  }
+}
+
+.no-user-select() {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
