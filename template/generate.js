@@ -31,7 +31,7 @@ Object.keys(task.components).forEach(k => {
   componentMap.push(`'${k}':require('${componentFileName}').default`);
 });
 
-const componentMapFileName = path.join(sourcePath, 'components.js');
+const componentMapFileName = path.join(sourcePath, 'localComponents.js');
 if (fs.existsSync(componentMapFileName)) {
   fs.unlinkSync(componentMapFileName);
 }

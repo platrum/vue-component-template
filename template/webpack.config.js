@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs');
 
-let componentsFileName = path.join(__dirname, 'src', 'components.js');
+let componentsFileName = path.join(__dirname, 'src', 'localComponents.js');
 if (!fs.existsSync(componentsFileName)) {
   fs.appendFile(componentsFileName, 'export default {};');
 }

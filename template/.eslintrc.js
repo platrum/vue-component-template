@@ -39,6 +39,7 @@ module.exports = {
     "space-in-parens": [ "error", "never" ],
     "space-before-function-paren": [ "error", "never" ],
     "array-bracket-spacing": [ "error", "always" ],
-    "key-spacing": [ "error" ]
+    "key-spacing": [ "error" ],
+    "vue/attribute-hyphenation": [ 2, "always" ]
   }
 };
