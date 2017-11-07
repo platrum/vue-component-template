@@ -11,4 +11,4 @@ yarn-error.log
 *.njsproj
 *.sln
 
-template/src/localComponents.js
+src/localComponents.js
