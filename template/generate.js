@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const readline = require('readline');
+const readlineSync = require('readline-sync');
 
 if (!process.argv[2]) {
   console.error(`Usage:\n\tnode generate.js path/to/task.json`);
@@ -31,21 +31,7 @@ Object.keys(task.components).forEach(k => {
   }
 
   const componentFileName = path.join(componentDir, component.name + '.vue');
-  if (fs.existsSync(componentFileName)) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-
-    rl.question('rewrite component \'' + component.name + '\'? (y/n) ', (answer) => {
-      rl.close();
-      if (answer !== 'y') {
-        return;
-      }
-
-      fs.writeFileSync(componentFileName, renderComponent(component));
-    });
-  } else {
+  if (!fs.existsSync(componentFileName) || shouldRewriteComponent(component.name)) {
     fs.writeFileSync(componentFileName, renderComponent(component));
   }
 
@@ -58,30 +44,20 @@ if (fs.existsSync(componentMapFileName)) {
 }
 fs.appendFileSync(componentMapFileName, 'export default {' + componentMap.join(',') + '}');
 
+function shouldRewriteComponent(name) {
+  return readlineSync.question('rewrite component \'' + name + '\'? (y/n) ') === 'y';
+}
+
 function renderComponent({ props, methods, slots, events }) {
-  const renderedProps = Object.keys(props).map(name => {
-    return renderProp(Object.assign({}, props[name], { name }));
-  }).join(",\n    ");
+  const renderedSlots = renderSlots(slots);
+  const renderedEvents = renderEvents(events);
 
-  const renderedMethods = Object.keys(methods).map(name => {
-    return renderMethod(Object.assign({}, methods[name], { name }));
-  }).join(",\n    ");
+  const objectBlocks = [
+    renderProps(props),
+    renderMethods(methods)
+  ];
 
-  const renderedSlots = Object.keys(slots).map(name => {
-    const nameProp = name === 'default' ? '' : ` name="${name}"`;
-    const { description } = slots[name];
-    return `<slot${nameProp}><!-- ${description} --></slot>`;
-  }).join("\n    ");
-
-  const renderedEvents = Object.keys(events).map(name => {
-    const event = events[name];
-    if (!event.args) {
-      return `// $emit('${name}')`;
-    }
-
-    const args = event.args.map(arg => `{${arg}}`).join(', ');
-    return `// $emit('${name}', ${args})`;
-  }).join("\n");
+  const content = objectBlocks.filter(v => v.trim() !== '').join(",\n  ");
 
   return `<template>
   <div>
@@ -90,17 +66,69 @@ function renderComponent({ props, methods, slots, events }) {
 </template>
 
 <script>
-${renderedEvents}
-export default {
-  props: {
-    ${renderedProps}
-  },
-  methods: {
-    ${renderedMethods}
-  }
+${renderedEvents}export default {
+  ${content}
 };
 </script>
 `;
+}
+
+function renderSlots(slots) {
+  if (!slots) {
+    return '';
+  }
+
+  return Object.keys(slots).map(name => {
+    const nameProp = name === 'default' ? '' : ` name="${name}"`;
+    const { description } = slots[name];
+    return `<slot${nameProp}><!-- ${description} --></slot>`;
+  }).join("\n    ");
+}
+
+function renderEvents(events) {
+  if (!events) {
+    return '';
+  }
+
+  const result = Object.keys(events).map(name => {
+    const { args, description } = events[name];
+    if (!args) {
+      return ` * @event ${name} ${description}`;
+    }
+
+    const renderedArgs = args.map(arg => `{${arg}}`).join(', ');
+    return ` * @event ${name} ${renderedArgs} ${description}`;
+  }).join("\n");
+
+  return `/**\n${result}\n */\n`;
+}
+
+function renderProps(props) {
+  if (!props) {
+    return '';
+  }
+
+  const result = Object.keys(props).map(name => {
+    return renderProp(Object.assign({}, props[name], { name }));
+  }).join(",\n    ");
+
+  return `props: {
+    ${result}
+  }`;
+}
+
+function renderMethods(methods) {
+  if (!methods) {
+    return '';
+  }
+
+  const result = Object.keys(methods).map(name => {
+    return renderMethod(Object.assign({}, methods[name], { name }));
+  }).join(",\n    ");
+
+  return `methods: {
+    ${result}
+  }`
 }
 
 function renderProp(prop) {
@@ -114,15 +142,31 @@ function renderProp(prop) {
   }
 
   let defaultValueRender = '';
-  if (defaultValue) {
-    defaultValue = type === 'Number' ? defaultValue : "'" + defaultValue + "'";
-    defaultValueRender = `,
+  if (typeof defaultValue !== 'undefined') {
+    if (typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
+      defaultValue = renderValue(defaultValue);
+      defaultValueRender = `,
+      default: () => {
+        return ${defaultValue}; 
+      }`;
+    } else {
+      defaultValue = renderValue(defaultValue);
+      defaultValueRender = `,
       default: () => ${defaultValue}`;
+    }
   }
 
-  return `${name}: {${description}
-      type: ${type}${defaultValueRender}
+  const renderedType = type.split('|').length > 1 ? '[ ' + type.split('|').join(', ') + ']' : type;
+  const renderedName = dehyphenate(name);
+
+  return `${renderedName}: {${description}
+      type: ${renderedType}${defaultValueRender}
     }`;
+}
+
+function dehyphenate(name) {
+  const result = name.split('-').map(upperCaseFirst).join('');
+  return result.substring(0, 1).toLowerCase() + result.substring(1);
 }
 
 function renderMethod({ name, description }) {
@@ -134,3 +178,32 @@ function renderMethod({ name, description }) {
       // @todo ${description}
     }`;
 }
+
+function renderValue(value) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return '[]';
+    }
+
+    return '[ ' + value.map(renderValue).join(', ') + ' ]';
+  }
+
+  if (typeof value === 'object') {
+    if (Object.keys(value).length === 0) {
+      return '{}';
+    }
+
+    return '{ ' + Object.keys(value).map(k => k + ': ' + renderValue(value[k])).join(', ') + ' }';
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+
+  return `'${value}'`;
+}
+
+function upperCaseFirst(val) {
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}
+

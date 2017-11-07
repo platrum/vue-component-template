@@ -18,7 +18,7 @@ Object.keys(localComponents).forEach(k => {
 const emit = Vue.prototype.$emit;
 Vue.prototype.$emit = function() {
   const componentTag = this.$vnode.componentOptions.tag;
-  console.log(componentTag + ' -> ' + arguments[0], Array.from(arguments).slice(1));
+  console.log('@event ' + componentTag + ' -> ' + arguments[0], Array.from(arguments).slice(1));
   emit.apply(this, arguments);
 };
 
