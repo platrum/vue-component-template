@@ -1,10 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 if (!process.argv[2]) {
   console.error(`Usage:\n\tnode generate.js path/to/task.json`);
@@ -36,6 +32,11 @@ Object.keys(task.components).forEach(k => {
 
   const componentFileName = path.join(componentDir, component.name + '.vue');
   if (fs.existsSync(componentFileName)) {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
     rl.question('rewrite component \'' + component.name + '\'? (y/n) ', (answer) => {
       rl.close();
       if (answer !== 'y') {
