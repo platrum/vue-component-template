@@ -1,5 +1,10 @@
 const path = require('path');
 const fs = require('fs');
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 if (!process.argv[2]) {
   console.error(`Usage:\n\tnode generate.js path/to/task.json`);
@@ -12,9 +17,15 @@ if (!fs.existsSync(fileName)) {
   return;
 }
 
-const task = require(fileName);
+const fileContent = fs.readFileSync(fileName).toString();
+const jsonStart = fileContent.search(/\n\{\n/);
+
+const exampleTemplate = fileContent.substring(0, jsonStart);
+const task = JSON.parse(fileContent.substring(jsonStart));
 
 const sourcePath = path.join(__dirname, 'src');
+fs.writeFileSync(sourcePath + '/App.vue', exampleTemplate + "\n");
+
 let componentMap = [];
 Object.keys(task.components).forEach(k => {
   const component = task.components[k];
@@ -24,8 +35,17 @@ Object.keys(task.components).forEach(k => {
   }
 
   const componentFileName = path.join(componentDir, component.name + '.vue');
-  if (!fs.existsSync(componentFileName)) {
-    fs.appendFileSync(componentFileName, renderComponent(component));
+  if (fs.existsSync(componentFileName)) {
+    rl.question('rewrite component \'' + component.name + '\'? (y/n) ', (answer) => {
+      rl.close();
+      if (answer !== 'y') {
+        return;
+      }
+
+      fs.writeFileSync(componentFileName, renderComponent(component));
+    });
+  } else {
+    fs.writeFileSync(componentFileName, renderComponent(component));
   }
 
   componentMap.push(`'${k}':require('${componentFileName}').default`);
@@ -37,7 +57,7 @@ if (fs.existsSync(componentMapFileName)) {
 }
 fs.appendFileSync(componentMapFileName, 'export default {' + componentMap.join(',') + '}');
 
-function renderComponent({ name, props, methods, slots }) {
+function renderComponent({ props, methods, slots, events }) {
   const renderedProps = Object.keys(props).map(name => {
     return renderProp(Object.assign({}, props[name], { name }));
   }).join(",\n    ");
@@ -52,6 +72,16 @@ function renderComponent({ name, props, methods, slots }) {
     return `<slot${nameProp}><!-- ${description} --></slot>`;
   }).join("\n    ");
 
+  const renderedEvents = Object.keys(events).map(name => {
+    const event = events[name];
+    if (!event.args) {
+      return `// $emit('${name}')`;
+    }
+
+    const args = event.args.map(arg => `{${arg}}`).join(', ');
+    return `// $emit('${name}', ${args})`;
+  }).join("\n");
+
   return `<template>
   <div>
     ${renderedSlots}  
@@ -59,6 +89,7 @@ function renderComponent({ name, props, methods, slots }) {
 </template>
 
 <script>
+${renderedEvents}
 export default {
   props: {
     ${renderedProps}
