@@ -156,7 +156,7 @@ function renderProp(prop) {
     }
   }
 
-  const renderedType = type.split('|').length > 1 ? '[ ' + type.split('|').join(', ') + ']' : type;
+  const renderedType = type.split('|').length > 1 ? '[ ' + type.split('|').join(', ') + ' ]' : type;
   const renderedName = dehyphenate(name);
 
   return `${renderedName}: {${description}
