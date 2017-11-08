@@ -14,13 +14,19 @@ if (!fs.existsSync(fileName)) {
 }
 
 const fileContent = fs.readFileSync(fileName).toString();
-const jsonStart = fileContent.search(/\n\{\n/);
+const delimiter = '</template>';
+let jsonStart = fileContent.indexOf(delimiter);
+if (jsonStart > -1) {
+  jsonStart += delimiter.length;
+} else {
+  jsonStart = 0;
+}
 
 const exampleTemplate = fileContent.substring(0, jsonStart);
 const task = JSON.parse(fileContent.substring(jsonStart));
 
 const sourcePath = path.join(__dirname, 'src');
-fs.writeFileSync(sourcePath + '/App.vue', exampleTemplate + "\n");
+fs.writeFileSync(path.join(sourcePath, 'App.vue'), exampleTemplate + "\n");
 
 let componentMap = [];
 Object.keys(task.components).forEach(k => {
@@ -35,7 +41,8 @@ Object.keys(task.components).forEach(k => {
     fs.writeFileSync(componentFileName, renderComponent(component));
   }
 
-  componentMap.push(`'${k}':require('${componentFileName}').default`);
+  const preparedFileName = componentFileName.replace(/\\/g, '\\\\');
+  componentMap.push(`'${k}':require('${preparedFileName}').default`);
 });
 
 const componentMapFileName = path.join(sourcePath, 'localComponents.js');
