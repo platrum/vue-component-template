@@ -45,6 +45,7 @@ module.exports = {
     "array-bracket-spacing": [ "error", "always" ],
     "key-spacing": [ "error" ],
     "space-before-blocks": [ "error", "always" ],
+    "eqeqeq": [ "error", "always" ],
     "vue/attribute-hyphenation": [ 2, "always" ],
     "vue/no-side-effects-in-computed-properties": [ "error" ],
     "vue/html-end-tags": [ "error" ],
