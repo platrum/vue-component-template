@@ -14,14 +14,10 @@ if (!fs.existsSync(fileName)) {
 }
 
 const fileContent = fs.readFileSync(fileName).toString();
-const delimiter = '</template>';
-let jsonStart = fileContent.indexOf(delimiter);
-if (jsonStart > -1) {
-  jsonStart += delimiter.length;
-} else {
-  jsonStart = 0;
-}
-
+const templateEndPosition = delimiterEndPosition(fileContent, '</template>');
+const scriptEndPosition = delimiterEndPosition(fileContent, '</script>');
+const styleEndPosition = delimiterEndPosition(fileContent, '</style>');
+const jsonStart = Math.max(templateEndPosition, scriptEndPosition, styleEndPosition);
 const exampleTemplate = fileContent.substring(0, jsonStart);
 const task = JSON.parse(fileContent.substring(jsonStart));
 
@@ -51,6 +47,15 @@ if (fs.existsSync(componentMapFileName)) {
 }
 fs.appendFileSync(componentMapFileName, 'export default {' + componentMap.join(',') + '}');
 
+function delimiterEndPosition(fileContent, delimiter) {
+  const result = fileContent.indexOf(delimiter);
+  if (result > -1) {
+    return result + delimiter.length;
+  }
+
+  return 0;
+}
+
 function shouldRewriteComponent(name) {
   return readlineSync.question('rewrite component \'' + name + '\'? (y/n) ') === 'y';
 }
@@ -64,7 +69,7 @@ function renderComponent({ props, methods, slots, events }) {
     renderMethods(methods)
   ];
 
-  const content = objectBlocks.filter(v => v.trim() !== '').join(",\n  ");
+  const content = objectBlocks.filter(v => v.trim() !== '').join(',\n  ');
 
   return `<template>
   <div>
@@ -89,7 +94,7 @@ function renderSlots(slots) {
     const nameProp = name === 'default' ? '' : ` name="${name}"`;
     const { description } = slots[name];
     return `<slot${nameProp}><!-- ${description} --></slot>`;
-  }).join("\n    ");
+  }).join('\n    ');
 }
 
 function renderEvents(events) {
@@ -105,7 +110,7 @@ function renderEvents(events) {
 
     const renderedArgs = args.map(arg => `{${arg}}`).join(', ');
     return ` * @event ${name} ${renderedArgs} ${description}`;
-  }).join("\n");
+  }).join('\n');
 
   return `/**\n${result}\n */\n`;
 }
@@ -115,9 +120,9 @@ function renderProps(props) {
     return '';
   }
 
-  const result = Object.keys(props).map(name => {
-    return renderProp(Object.assign({}, props[name], { name }));
-  }).join(",\n    ");
+  const result = Object.keys(props)
+    .map(name => renderProp(Object.assign({}, props[name], { name })))
+    .join(',\n    ');
 
   return `props: {
     ${result}
@@ -129,13 +134,13 @@ function renderMethods(methods) {
     return '';
   }
 
-  const result = Object.keys(methods).map(name => {
-    return renderMethod(Object.assign({}, methods[name], { name }));
-  }).join(",\n    ");
+  const result = Object.keys(methods)
+    .map(name => renderMethod(Object.assign({}, methods[name], { name })))
+    .join(',\n    ');
 
   return `methods: {
     ${result}
-  }`
+  }`;
 }
 
 function renderProp(prop) {
