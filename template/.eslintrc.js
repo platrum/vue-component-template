@@ -39,6 +39,7 @@ module.exports = {
     "no-multi-spaces": [ "error" ],
     "padded-blocks": [ "error", "never" ],
     "vars-on-top": [ "error" ],
+    "no-unused-expressions": [ "error" ],
     "func-call-spacing": [ "error", "never" ],
     "arrow-spacing": [ "error", { "before": true, "after": true } ],
     "arrow-body-style": [ "error", "as-needed" ],
