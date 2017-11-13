@@ -44,7 +44,7 @@ module.exports = {
     "space-before-function-paren": [ "error", "never" ],
     "no-whitespace-before-property": [ "error" ],
     "array-bracket-spacing": [ "error", "always" ],
-    "space-after-keywords": [ "error", "always" ],
+    "keyword-spacing": [ "error" ],
     "key-spacing": [ "error" ],
     "space-before-blocks": [ "error", "always" ],
     "eqeqeq": [ "error", "always" ],
