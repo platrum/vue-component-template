@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import App from './App.vue';
 import localComponents from './localComponents';
+import 'minireset.css';
 
 const { components } = window.ui_app.default(Vue);
 Object.keys(components).forEach(k => {

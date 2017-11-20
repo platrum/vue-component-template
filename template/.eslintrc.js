@@ -55,6 +55,7 @@ module.exports = {
     "vue/attribute-hyphenation": [ 2, "always" ],
     "vue/no-side-effects-in-computed-properties": [ "error" ],
     "vue/html-end-tags": [ "error" ],
+    "vue/html-indent": [ "error", 2 ],
     "vue/v-bind-style": [ "error" ],
     "vue/no-multi-spaces": [ "error" ],
     "comma-spacing":  ["error", { "before": false, "after": true }],
