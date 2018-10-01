@@ -4,7 +4,7 @@ import localComponents from './localComponents';
 import 'minireset.css';
 import './fonts.css';
 
-const { components } = window.module_ui_app.default(Vue);
+const { components } = window.module_ui_app.default;
 Object.keys(components).forEach(k => {
   if (localComponents[k]) {
     return;

@@ -1,3 +1,3 @@
 <template>
-  <ui-title>Development Environment</ui-title>
+  <ui-title>Develoment environment</ui-title>
 </template>

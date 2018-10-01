@@ -20,16 +20,30 @@ module.exports = {
     "indent": [ "error", 2, {
       "SwitchCase": 1
     } ],
+    "complexity": ["error", 8],
+    "no-mixed-operators": [
+      "error",
+      {
+        "groups": [
+          ["+", "-", "*", "/", "%", "**"],
+          ["&", "|", "^", "~", "<<", ">>", ">>>"],
+          ["==", "!=", "===", "!==", ">", ">=", "<", "<="],
+          ["&&", "||"],
+          ["in", "instanceof"]
+        ],
+        "allowSamePrecedence": true
+      }
+    ],
     // "linebreak-style": [ "error", "unix" ],
     "eol-last": [ "error", "always" ],
     "quotes": [ "error", "single" ],
-    "no-extra-parens": [ "error" ],
+    "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false }],
     "func-style": [ "error", "declaration" ],
     "prefer-arrow-callback": [ "error", { "allowNamedFunctions": false, "allowUnboundThis": false } ],
     "no-unsafe-negation": [ "error" ],
     "no-alert": [ "warn" ],
     "object-shorthand": [ "error", "always" ],
-    "no-console": [ "warn" ],
+    "no-console": [ "warn", { allow: [ "error" ] } ],
     "no-var": [ "error" ],
     "semi": [ "error", "always" ],
     "camelcase": [ "error", { "properties": "never" } ],
@@ -42,12 +56,12 @@ module.exports = {
     "no-unused-expressions": [ "error" ],
     "func-call-spacing": [ "error", "never" ],
     "arrow-spacing": [ "error", { "before": true, "after": true } ],
-    "arrow-body-style": [ "error", "as-needed" ],
+    "arrow-body-style": [ "error", "as-needed", {"requireReturnForObjectLiteral": true} ],
     "block-spacing": [ "error", "always" ],
     "space-in-parens": [ "error", "never" ],
     "space-before-function-paren": [ "error", "never" ],
     "no-whitespace-before-property": [ "error" ],
-    "array-bracket-spacing": [ "error", "always" ],
+    "array-bracket-spacing": [ "error", "never" ],
     "keyword-spacing": [ "error" ],
     "key-spacing": [ "error" ],
     "space-before-blocks": [ "error", "always" ],
